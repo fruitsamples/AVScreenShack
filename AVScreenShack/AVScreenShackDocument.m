@@ -1,7 +1,8 @@
+
 /*
      File: AVScreenShackDocument.m
  Abstract: Document, owns session, screen capture input, and movie file output
-  Version: 1.0
+  Version: 2.0
  
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
@@ -41,7 +42,7 @@
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  
- Copyright (C) 2011 Apple Inc. All Rights Reserved.
+ Copyright (C) 2012 Apple Inc. All Rights Reserved.
  
  */
 
@@ -49,28 +50,41 @@
 
 #import <AVFoundation/AVFoundation.h>
 
-@implementation AVScreenShackDocument
+@interface AVScreenShackDocument ()
 
-@synthesize captureSession = captureSession, captureScreenInput = captureScreenInput;
+@property (weak) IBOutlet NSView *captureView;
+
+- (IBAction)startRecording:(id)sender;
+- (IBAction)stopRecording:(id)sender;
+- (IBAction)setDisplayAndCropRect:(id)sender;
+
+@end
+
+
+@implementation AVScreenShackDocument
+{
+    CGDirectDisplayID           display;
+    AVCaptureMovieFileOutput    *captureMovieFileOutput;
+}
 
 #pragma mark Capture
 
 - (BOOL)createCaptureSession:(NSError **)outError
 {
     /* Create a capture session. */
-    captureSession = [[AVCaptureSession alloc] init];
-	if ([captureSession canSetSessionPreset:AVCaptureSessionPresetHigh])
+    self.captureSession = [[AVCaptureSession alloc] init];
+	if ([self.captureSession canSetSessionPreset:AVCaptureSessionPresetHigh])
     {
         /* Specifies capture settings suitable for high quality video and audio output. */
-		[captureSession setSessionPreset:AVCaptureSessionPresetHigh];
+		[self.captureSession setSessionPreset:AVCaptureSessionPresetHigh];
     }
     
     /* Add the main display as a capture input. */
     display = CGMainDisplayID();
-    captureScreenInput = [[AVCaptureScreenInput alloc] initWithDisplayID:display];
-    if ([captureSession canAddInput:captureScreenInput]) 
+    self.captureScreenInput = [[AVCaptureScreenInput alloc] initWithDisplayID:display];
+    if ([self.captureSession canAddInput:self.captureScreenInput]) 
     {
-        [captureSession addInput:captureScreenInput];
+        [self.captureSession addInput:self.captureScreenInput];
     } 
     else 
     {
@@ -80,14 +94,17 @@
     /* Add a movie file output + delegate. */
     captureMovieFileOutput = [[AVCaptureMovieFileOutput alloc] init];
     [captureMovieFileOutput setDelegate:self];
-    if ([captureSession canAddOutput:captureMovieFileOutput]) 
+    if ([self.captureSession canAddOutput:captureMovieFileOutput]) 
     {
-        [captureSession addOutput:captureMovieFileOutput];
+        [self.captureSession addOutput:captureMovieFileOutput];
     } 
     else 
     {
         return NO;
     }
+	
+	/* Register for notifications of errors during the capture session so we can display an alert. */
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(captureSessionRuntimeErrorDidOccur:) name:AVCaptureSessionRuntimeErrorNotification object:self.captureSession];
     
     return YES;
 }
@@ -101,17 +118,16 @@
 -(void)addCaptureVideoPreview
 {
     /* Create a video preview layer. */
-	AVCaptureVideoPreviewLayer *videoPreviewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:captureSession];
+	AVCaptureVideoPreviewLayer *videoPreviewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.captureSession];
     
     /* Configure it.*/
-	[videoPreviewLayer setFrame:[[captureView layer] bounds]];
+	[videoPreviewLayer setFrame:[[self.captureView layer] bounds]];
 	[videoPreviewLayer setAutoresizingMask:kCALayerWidthSizable|kCALayerHeightSizable];
     
     /* Add the preview layer as a sublayer to the view. */
-    [[captureView layer] addSublayer:videoPreviewLayer];
+    [[self.captureView layer] addSublayer:videoPreviewLayer];
     /* Specify the background color of the layer. */
-	[[captureView layer] setBackgroundColor:CGColorGetConstantColor(kCGColorBlack)];
-    [videoPreviewLayer release];    
+	[[self.captureView layer] setBackgroundColor:CGColorGetConstantColor(kCGColorBlack)];
 }
 
 /*
@@ -121,7 +137,7 @@
  */
 - (float)maximumScreenInputFramerate
 {
-	Float64 minimumVideoFrameInterval = CMTimeGetSeconds([captureScreenInput minFrameDuration]);
+	Float64 minimumVideoFrameInterval = CMTimeGetSeconds([self.captureScreenInput minFrameDuration]);
 	return minimumVideoFrameInterval > 0.0f ? 1.0f/minimumVideoFrameInterval : 0.0;
 }
 
@@ -130,36 +146,35 @@
 {
 	CMTime minimumFrameDuration = CMTimeMake(1, (int32_t)maximumFramerate);
     /* Set the screen input's minimum frame duration. */
-	[captureScreenInput setMinFrameDuration:minimumFrameDuration];
+	[self.captureScreenInput setMinFrameDuration:minimumFrameDuration];
 }
 
 /* Add a display as an input to the capture session. */
 -(void)addDisplayInputToCaptureSession:(CGDirectDisplayID)newDisplay cropRect:(CGRect)cropRect
 {
     /* Indicates the start of a set of configuration changes to be made atomically. */
-    [captureSession beginConfiguration];
+    [self.captureSession beginConfiguration];
     
     /* Is this display the current capture input? */
     if ( newDisplay != display ) 
     {
         /* Display is not the current input, so remove it. */
-        [captureSession removeInput:captureScreenInput];
+        [self.captureSession removeInput:self.captureScreenInput];
         AVCaptureScreenInput *newScreenInput = [[AVCaptureScreenInput alloc] initWithDisplayID:newDisplay];
         
-        [captureScreenInput release];
-        captureScreenInput = newScreenInput;
-        if ( [captureSession canAddInput:captureScreenInput] )
+        self.captureScreenInput = newScreenInput;
+        if ( [self.captureSession canAddInput:self.captureScreenInput] )
         {
             /* Add the new display capture input. */
-            [captureSession addInput:captureScreenInput];
+            [self.captureSession addInput:self.captureScreenInput];
         }
         [self setMaximumScreenInputFramerate:[self maximumScreenInputFramerate]];
     }
     /* Set the bounding rectangle of the screen area to be captured, in pixels. */
-    [captureScreenInput setCropRect:cropRect];
+    [self.captureScreenInput setCropRect:cropRect];
     
     /* Commits the configuration changes. */
-    [captureSession commitConfiguration];
+    [self.captureSession commitConfiguration];
 }
 
 
@@ -175,6 +190,14 @@
     [[NSWorkspace sharedWorkspace] openURL:outputFileURL];
 }
 
+- (BOOL)captureOutputShouldProvideSampleAccurateRecordingStart:(AVCaptureOutput *)captureOutput
+{
+	// We don't require frame accurate start when we start a recording. If we answer YES, the capture output
+    // applies outputSettings immediately when the session starts previewing, resulting in higher CPU usage
+    // and shorter battery life.
+	return NO;
+}
+
 #pragma mark NSDocument
 
 /* Initializes a AVScreenShackDocument document. */
@@ -187,7 +210,6 @@
         BOOL success = [self createCaptureSession:outError];
         if (!success) 
         {
-            [self release];
             return nil;
         }
     }
@@ -197,11 +219,7 @@
 
 - (void)dealloc
 {
-    [captureSession release];
-    [captureScreenInput release];
-    [captureMovieFileOutput release];
-    
-    [super dealloc];
+	[[NSNotificationCenter defaultCenter] removeObserver:self name:AVCaptureSessionRuntimeErrorNotification object:self.captureSession];
 }
 
 - (NSString *)windowNibName
@@ -223,7 +241,7 @@
     [self addCaptureVideoPreview];
 
     /* Start the capture session running. */
-    [captureSession startRunning];
+    [self.captureSession startRunning];
 
 	[[aController window] setContentBorderThickness:75.f forEdge:NSMinYEdge];
 	[[aController window] setMovableByWindowBackground:YES];
@@ -233,7 +251,7 @@
 - (void)close
 {
     /* Stop the capture session running. */
-    [captureSession stopRunning];
+    [self.captureSession stopRunning];
     
     [super close];
 }
@@ -263,7 +281,7 @@
 	if ((e == kCGErrorSuccess) && (1 == matchingDisplayCount)) 
     {
         /* Add the display as a capture input. */
-        [self addDisplayInputToCaptureSession:displayID cropRect:rect];
+        [self addDisplayInputToCaptureSession:displayID cropRect:NSRectToCGRect(rect)];
     }
     
 	for (NSWindow* w in [NSApp windows])
@@ -293,11 +311,32 @@
 		DrawMouseBoxView* drawMouseBoxView = [[DrawMouseBoxView alloc] initWithFrame:frame];
 		drawMouseBoxView.delegate = self;
 		[window setContentView:drawMouseBoxView];
-		[drawMouseBoxView release];
 		[window makeKeyAndOrderFront:self];
 	}
 	
 	[[NSCursor crosshairCursor] push];
+}
+
+- (void)captureSessionRuntimeErrorDidOccur:(NSNotification *)notification
+{
+	NSError *error = [[notification userInfo] objectForKey:AVCaptureSessionErrorKey];
+	if ([error localizedDescription]) {
+		if ([error localizedFailureReason]) {
+			NSRunAlertPanel(@"AVScreenShack Alert", 
+							[NSString stringWithFormat:@"%@\n\n%@", [error localizedDescription], [error localizedFailureReason]],
+							nil, nil, nil);
+		}
+		else {
+			NSRunAlertPanel(@"AVScreenShack Alert", 
+							[NSString stringWithFormat:@"%@", [error localizedDescription]],
+							nil, nil, nil);
+		}
+	}
+	else {
+		NSRunAlertPanel(@"AVScreenShack Alert", 
+						@"An unknown error occured",
+				 		nil, nil, nil);
+	}
 }
 
 #pragma mark Start/Stop Button Actions
@@ -305,10 +344,16 @@
 /* Called when the user presses the 'Start' button to start a recording. */
 - (IBAction)startRecording:(id)sender
 {
-	NSLog(@"Minimum Frame Duration: %f, Crop Rect: %@, Scale Factor: %f, Capture Mouse Clicks: %@", CMTimeGetSeconds([captureScreenInput minFrameDuration]), NSStringFromRect(NSRectFromCGRect([captureScreenInput cropRect])), [captureScreenInput scaleFactor], [captureScreenInput capturesMouseClicks] ? @"Yes" : @"No");
+	NSLog(@"Minimum Frame Duration: %f, Crop Rect: %@, Scale Factor: %f, Capture Mouse Clicks: %@, Capture Mouse Cursor: %@, Remove Duplicate Frames: %@",
+		  CMTimeGetSeconds([self.captureScreenInput minFrameDuration]),
+		  NSStringFromRect(NSRectFromCGRect([self.captureScreenInput cropRect])),
+		  [self.captureScreenInput scaleFactor],
+		  [self.captureScreenInput capturesMouseClicks] ? @"Yes" : @"No",
+		  [self.captureScreenInput capturesCursor] ? @"Yes" : @"No",
+		  [self.captureScreenInput removesDuplicateFrames] ? @"Yes" : @"No");
 	
 	char *tempNameBytes = tempnam([[@"~/Desktop/" stringByStandardizingPath] fileSystemRepresentation], "AVScreenShack_");
-	NSString *tempName = [[[NSString alloc] initWithBytesNoCopy:tempNameBytes length:strlen(tempNameBytes) encoding:NSUTF8StringEncoding freeWhenDone:YES] autorelease];
+	NSString *tempName = [[NSString alloc] initWithBytesNoCopy:tempNameBytes length:strlen(tempNameBytes) encoding:NSUTF8StringEncoding freeWhenDone:YES];
 	
     /* Starts recording to a given URL. */
     [captureMovieFileOutput startRecordingToOutputFileURL:[NSURL fileURLWithPath:[tempName stringByAppendingPathExtension:@"mov"]] recordingDelegate:self];

@@ -39,6 +39,7 @@
 		1BED9B82139D6E5900A332BD /* AVScreenShackPresetTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVScreenShackPresetTransformer.m; sourceTree = "<group>"; };
 		1BED9B83139D6E5900A332BD /* DrawMouseBoxView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrawMouseBoxView.h; sourceTree = "<group>"; };
 		1BED9B84139D6E5900A332BD /* DrawMouseBoxView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrawMouseBoxView.m; sourceTree = "<group>"; };
+		28A368FB158963E700C0B779 /* ReadMe.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ReadMe.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +59,7 @@
 		1BB2E851139D5E1700749B68 = {
 			isa = PBXGroup;
 			children = (
+				28A368FB158963E700C0B779 /* ReadMe.txt */,
 				1BB2E866139D5E1900749B68 /* AVScreenShack */,
 				1BB2E85F139D5E1900749B68 /* Frameworks */,
 				1BB2E85D139D5E1900749B68 /* Products */,
@@ -145,6 +147,9 @@
 /* Begin PBXProject section */
 		1BB2E853139D5E1700749B68 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0450;
+			};
 			buildConfigurationList = 1BB2E856139D5E1700749B68 /* Build configuration list for PBXProject "AVScreenShack" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -223,6 +228,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -250,6 +256,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -268,7 +275,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AVScreenShack/AVScreenShack-Prefix.pch";
 				INFOPLIST_FILE = "AVScreenShack/AVScreenShack-Info.plist";
@@ -281,7 +288,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AVScreenShack/AVScreenShack-Prefix.pch";
 				INFOPLIST_FILE = "AVScreenShack/AVScreenShack-Info.plist";

@@ -1,7 +1,8 @@
+
 /*
      File: AVScreenShackDocument.h
  Abstract: Document, owns session, screen capture input, and movie file output
-  Version: 1.0
+  Version: 2.0
  
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
@@ -41,7 +42,7 @@
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  
- Copyright (C) 2011 Apple Inc. All Rights Reserved.
+ Copyright (C) 2012 Apple Inc. All Rights Reserved.
  
  */
 
@@ -52,21 +53,8 @@
 @class AVCaptureSession, AVCaptureScreenInput, AVCaptureMovieFileOutput;
 
 @interface AVScreenShackDocument : NSDocument <AVCaptureFileOutputDelegate,AVCaptureFileOutputRecordingDelegate,DrawMouseBoxViewDelegate>
-{
-    IBOutlet NSView				*captureView;
-@private
-    CGDirectDisplayID           display;
-    AVCaptureSession            *captureSession;
-    AVCaptureScreenInput        *captureScreenInput;
-    AVCaptureMovieFileOutput    *captureMovieFileOutput;
-}
 
-@property (retain) AVCaptureSession *captureSession;
-@property (retain) AVCaptureScreenInput *captureScreenInput;
-
-- (IBAction)startRecording:(id)sender;
-- (IBAction)stopRecording:(id)sender;
-
-- (IBAction)setDisplayAndCropRect:(id)sender;
+@property (strong) AVCaptureSession *captureSession;
+@property (strong) AVCaptureScreenInput *captureScreenInput;
 
 @end

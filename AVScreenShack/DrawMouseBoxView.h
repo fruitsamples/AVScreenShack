@@ -1,7 +1,8 @@
+
 /*
      File: DrawMouseBoxView.h
  Abstract: Dims the screen and allows user to select a rectangle with a cross-hairs cursor
-  Version: 1.0
+  Version: 2.0
  
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
@@ -41,7 +42,7 @@
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  
- Copyright (C) 2011 Apple Inc. All Rights Reserved.
+ Copyright (C) 2012 Apple Inc. All Rights Reserved.
  
  */
 
@@ -53,11 +54,9 @@
 - (void)drawMouseBoxView:(DrawMouseBoxView*)view didSelectRect:(NSRect)rect;
 @end
 
-@interface DrawMouseBoxView : NSView {
-	id <DrawMouseBoxViewDelegate> _delegate;
-	NSPoint _mouseDownPoint;
-	NSRect _selectionRect;
-}
-@property(readwrite, assign) id <DrawMouseBoxViewDelegate> delegate;
+
+@interface DrawMouseBoxView : NSView
+
+@property(readwrite, weak) id <DrawMouseBoxViewDelegate> delegate;
 
 @end

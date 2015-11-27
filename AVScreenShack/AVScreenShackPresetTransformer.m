@@ -1,7 +1,8 @@
+
 /*
      File: AVScreenShackPresetTransformer.m
  Abstract: Transforms an AVCaptureSessionPreset to a number
-  Version: 1.0
+  Version: 2.0
  
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
@@ -41,7 +42,7 @@
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  
- Copyright (C) 2011 Apple Inc. All Rights Reserved.
+ Copyright (C) 2012 Apple Inc. All Rights Reserved.
  
  */
 
@@ -62,7 +63,7 @@
 
 - (id)transformedValue:(id)value
 {
-	NSNumber *number = nil;
+	NSNumber *number;
 	
 	if ([(NSString *)value isEqualToString:AVCaptureSessionPresetLow])
 		number = [NSNumber numberWithInteger:0];
@@ -88,7 +89,7 @@
 
 - (id)reverseTransformedValue:(id)value
 {
-	NSString *preset = nil;
+	NSString *preset;
 	
 	switch ([(NSNumber *)value integerValue]) {
 		case 0:
